@@ -1,5 +1,9 @@
 unless RUBY_ENGINE == "mruby"
-  require "gosu"
+  begin
+    require_relative "../ffi-gosu/lib/gosu"
+  rescue LoadError
+    require "gosu"
+  end
 end
 
 ROOT_PATH = File.expand_path("..", __FILE__)
@@ -12,7 +16,7 @@ require "#{ROOT_PATH}/lib/map"
 require "#{ROOT_PATH}/lib/timer"
 
 class Launcher < Gosu::Window
-  DETAILS = { 0 => "Very low", 1=> "Low", 2 => "Medium", 3 => "High" }
+  DETAILS = { 0 => "Very low", 1=> "Low", 2 => "Medium", 3 => "High", 4 => "Max" }
   def initialize
     super 640, 480, fullscreen: false
     self.caption = "jCaster Launcher"
@@ -21,15 +25,15 @@ class Launcher < Gosu::Window
 
     settings = File.read("#{ROOT_PATH}/settings").lines.map { |l| l.chomp.to_i }
 
-    @screen_width = settings[0]
-    @screen_height = settings[1]
+    @screen_width = Gosu.screen_width
+    @screen_height = Gosu.screen_height
     @details = settings[2]
     @timer = Timer.new
   end
 
   def update
     if Gosu.button_down? Gosu::KB_D and @timer.time > 100
-      @details == 3 ? @details = 0 : @details += 1
+      @details > DETAILS.size - 2 ? @details = 0 : @details += 1
       save_settings
       @timer.reset
     end

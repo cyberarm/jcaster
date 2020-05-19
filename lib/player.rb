@@ -1,5 +1,5 @@
 BOBBING = true
-MOV_SPD = 0.1
+MOVE_SPEED = 6.0
 
 class Player
 attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :rot_speed, :init
@@ -15,7 +15,7 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
 
     @weapon = Gosu::Image.new("#{ROOT_PATH}/media/uzi.png", tileable: false, retro: true)
     @weapon_offset = 0
-    @weapon_ratio = 0.3*@window.screen_height.to_f / (@weapon.height)
+    @weapon_ratio = 0.3 * Gosu.screen_height.to_f / (@weapon.height)
 
     @cross = Gosu.record(5, 5) do
       Gosu.draw_quad(2, 0, Gosu::Color::WHITE, 3, 0, Gosu::Color::WHITE, 2, 2, Gosu::Color::WHITE, 3, 2, Gosu::Color::WHITE)
@@ -53,7 +53,7 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
     old_plane_x = @plane_x
     @plane_x = @plane_x * Math::cos((@mouse_pos-@window.mouse_x)*@mouse_speed) - @plane_y * Math::sin((@mouse_pos-@window.mouse_x)*@mouse_speed)
     @plane_y = old_plane_x * Math::sin((@mouse_pos-@window.mouse_x)*@mouse_speed) + @plane_y * Math::cos((@mouse_pos-@window.mouse_x)*@mouse_speed)
-    @window.mouse_x = @window.width >> 1 if @window.mouse_x <= 1 or @window.mouse_x >= @window.screen_width - 1
+    @window.mouse_x = @window.width >> 1 if @window.mouse_x <= 1 or @window.mouse_x >= Gosu.screen_width - 1
     @mouse_pos = @window.mouse_x
   end
 
@@ -62,7 +62,7 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
   end
 
   def update
-    @move_speed = double_keys? ? MOV_SPD/Math::sqrt(2) : MOV_SPD
+    @move_speed = ((double_keys? ? MOVE_SPEED / Math.sqrt(2) : MOVE_SPEED)) * @window.delta_time
 
     if Gosu.button_down? Gosu::KB_W
       up
@@ -92,8 +92,8 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
   end
 
   def draw
-    @weapon.draw(0.6 * @window.screen_width, @window.screen_height - (@weapon.height - @weapon_offset - 5) * @weapon_ratio, 2, @weapon_ratio, @weapon_ratio)
+    @weapon.draw(0.6 * Gosu.screen_width, Gosu.screen_height - (@weapon.height - @weapon_offset - 5) * @weapon_ratio, 2, @weapon_ratio, @weapon_ratio)
     # draw_rot to avoid struggling with finding the exact center of screen
-    @cross.draw_rot(@window.screen_width >> 1, @window.screen_height>>1, 2, 0, 0, 0, 2.0, 2.0)
+    @cross.draw_rot(Gosu.screen_width >> 1, Gosu.screen_height >> 1, 2, 0, 0, 0, 2.0, 2.0)
   end
 end
