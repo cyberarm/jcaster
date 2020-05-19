@@ -1,59 +1,61 @@
-require 'gosu'
-include Gosu
+unless RUBY_ENGINE == "mruby"
+  require "gosu"
+end
 
-require './class/jCaster.rb'
-require './class/worldMap.rb'
-require './class/playerClass.rb'
-require './class/mapClass.rb'
-require './class/timer.rb'
- 
-class Launcher < Window
-  DETAILS = { 0 => "Very low", 1=> "Low", 2 => "Medium", 3 => "High" } 
+ROOT_PATH = File.expand_path("..", __FILE__)
+
+# MRUBY requires mruby-require mgem (https://github.com/mattn/mruby-require)
+require "#{ROOT_PATH}/lib/jcaster"
+require "#{ROOT_PATH}/lib/world_map"
+require "#{ROOT_PATH}/lib/player"
+require "#{ROOT_PATH}/lib/map"
+require "#{ROOT_PATH}/lib/timer"
+
+class Launcher < Gosu::Window
+  DETAILS = { 0 => "Very low", 1=> "Low", 2 => "Medium", 3 => "High" }
   def initialize
-    super 640, 480, false
+    super 640, 480, fullscreen: false
     self.caption = "jCaster Launcher"
-    enable_undocumented_retrofication
-    @title = Image.new(self, "media/title.jpg", true)
-    @font = Font.new(self, "media/boxybold.ttf", 20)
-    settings = Array.new
-    IO.foreach("settings") do |str| 
-      settings.push(str.to_i)
-    end
-    @scrW = settings[0]
-    @scrH = settings[1]
+    @title = Gosu::Image.new("#{ROOT_PATH}/media/title.jpg", tileable: true)
+    @font = Gosu::Font.new(20, name: "#{ROOT_PATH}/media/boxybold.ttf")
+
+    settings = File.read("#{ROOT_PATH}/settings").lines.map { |l| l.chomp.to_i }
+
+    @screen_width = settings[0]
+    @screen_height = settings[1]
     @details = settings[2]
     @timer = Timer.new
   end
-    
+
   def update
-    if button_down? KbD and @timer.time > 100
+    if Gosu.button_down? Gosu::KB_D and @timer.time > 100
       @details == 3 ? @details = 0 : @details += 1
       save_settings
       @timer.reset
     end
-    if button_down? KbReturn
+    if Gosu.button_down? Gosu::KB_RETURN
       JCaster.new.show
       close
     end
-    close if button_down? KbEscape
+    close if Gosu.button_down? Gosu::KB_ESCAPE
   end
-  
+
   def save_settings
     file = File.new("settings", 'w')
     if file
-      file.syswrite(@scrW.to_s + "\n" + @scrH.to_s + "\n" + @details.to_s)
+      file.syswrite(@screen_width.to_s + "\n" + @screen_height.to_s + "\n" + @details.to_s)
     else
       puts "File access error"
     end
     file.close
   end
-  
+
   def draw
     @title.draw(0,0,10,2,2)
-    @font.draw("v#{VERSION}!", 460, 140, 10, 1, 1, color = 0xffffffff)
-    @font.draw("<c=6a6a6a>R</c>esolution: #{@scrW} x #{@scrH}", 20, 240, 10, 1, 1, color = 0xffffffff)
-    @font.draw("<c=6a6a6a>D</c>etails: #{DETAILS[@details]}", 20, 300, 10, 1, 1, color = 0xffffffff)
-    @font.draw_rel("PRESS ENTER TO START", 320, 440, 10, 0.5, 0.5, 1, 1, color = 0xffffffff) if (milliseconds/500)%2 == 0
+    @font.draw_text("v#{VERSION}!", 460, 140, 10, 1, 1, color = 0xffffffff)
+    @font.draw_markup("<c=6a6a6a>R</c>esolution: #{@screen_width} x #{@screen_height}", 20, 240, 10, 1, 1, color = 0xffffffff)
+    @font.draw_markup("<c=6a6a6a>D</c>etails: #{DETAILS[@details]}", 20, 300, 10, 1, 1, color = 0xffffffff)
+    @font.draw_text_rel("PRESS ENTER TO START", 320, 440, 10, 0.5, 0.5, 1, 1, color = 0xffffffff) if (Gosu.milliseconds / 500).to_i % 2 == 0
   end
 end
 

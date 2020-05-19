@@ -12,40 +12,40 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
     @window.mouse_x = @window.width >> 1
     @mouse_pos = @window.mouse_x
     @mouse_speed = 0.005
-    
-    @weapon = Image.new(window, "media/uzi.png", false)
+
+    @weapon = Gosu::Image.new("#{ROOT_PATH}/media/uzi.png", tileable: false, retro: true)
     @weapon_offset = 0
-    @weapon_ratio = 0.3*@window.scrH.fdiv(@weapon.height)
-    
-    @cross = @window.record(5, 5) do
-      @window.draw_quad(2, 0, Color::WHITE, 3, 0, Color::WHITE, 2, 2, Color::WHITE, 3, 2, Color::WHITE) 
-      @window.draw_quad(2, 3, Color::WHITE, 3, 3, Color::WHITE, 2, 5, Color::WHITE, 3, 5, Color::WHITE) 
-      @window.draw_quad(0, 2, Color::WHITE, 0, 3, Color::WHITE, 2, 2, Color::WHITE, 2, 3, Color::WHITE) 
-      @window.draw_quad(3, 2, Color::WHITE, 3, 3, Color::WHITE, 5, 2, Color::WHITE, 5, 3, Color::WHITE) 
+    @weapon_ratio = 0.3*@window.screen_height.to_f / (@weapon.height)
+
+    @cross = Gosu.record(5, 5) do
+      Gosu.draw_quad(2, 0, Gosu::Color::WHITE, 3, 0, Gosu::Color::WHITE, 2, 2, Gosu::Color::WHITE, 3, 2, Gosu::Color::WHITE)
+      Gosu.draw_quad(2, 3, Gosu::Color::WHITE, 3, 3, Gosu::Color::WHITE, 2, 5, Gosu::Color::WHITE, 3, 5, Gosu::Color::WHITE)
+      Gosu.draw_quad(0, 2, Gosu::Color::WHITE, 0, 3, Gosu::Color::WHITE, 2, 2, Gosu::Color::WHITE, 2, 3, Gosu::Color::WHITE)
+      Gosu.draw_quad(3, 2, Gosu::Color::WHITE, 3, 3, Gosu::Color::WHITE, 5, 2, Gosu::Color::WHITE, 5, 3, Gosu::Color::WHITE)
     end
     @init = true
   end
-  
+
   def up
     @pos_x += @dir_x * @move_speed if $world_map[(@pos_x + @dir_x * @move_speed).to_i][@pos_y.to_i] == 0
     @pos_y += @dir_y * @move_speed if $world_map[@pos_x.to_i][(@pos_y + @dir_y * @move_speed).to_i] == 0
   end
-  
+
   def down
     @pos_x -= @dir_x * @move_speed if $world_map[(@pos_x - @dir_x * @move_speed).to_i][@pos_y.to_i] == 0
     @pos_y -= @dir_y * @move_speed if $world_map[@pos_x.to_i][(@pos_y - @dir_y * @move_speed).to_i] == 0
   end
-  
+
   def right
     @pos_x += @plane_x * @move_speed if $world_map[(@pos_x + @plane_x * @move_speed).to_i][@pos_y.to_i] == 0
     @pos_y += @plane_y * @move_speed if $world_map[@pos_x.to_i][(@pos_y + @plane_y * @move_speed).to_i] == 0
   end
-  
+
   def left
     @pos_x -= @plane_x * @move_speed if $world_map[(@pos_x - @plane_x * @move_speed).to_i][@pos_y.to_i] == 0
     @pos_y -= @plane_y * @move_speed if $world_map[@pos_x.to_i][(@pos_y - @plane_y * @move_speed).to_i] == 0
   end
-    
+
   def turn
     old_dir_x = @dir_x;
     @dir_x = @dir_x * Math::cos((@mouse_pos-@window.mouse_x)*@mouse_speed) - @dir_y * Math::sin((@mouse_pos-@window.mouse_x)*@mouse_speed)
@@ -53,46 +53,47 @@ attr_reader :pos_x, :pos_y, :dir_x, :dir_y, :plane_x, :plane_y, :move_speed, :ro
     old_plane_x = @plane_x
     @plane_x = @plane_x * Math::cos((@mouse_pos-@window.mouse_x)*@mouse_speed) - @plane_y * Math::sin((@mouse_pos-@window.mouse_x)*@mouse_speed)
     @plane_y = old_plane_x * Math::sin((@mouse_pos-@window.mouse_x)*@mouse_speed) + @plane_y * Math::cos((@mouse_pos-@window.mouse_x)*@mouse_speed)
-    @window.mouse_x = @window.width >> 1 if @window.mouse_x <= 1 or @window.mouse_x >= @window.scrW-1 
+    @window.mouse_x = @window.width >> 1 if @window.mouse_x <= 1 or @window.mouse_x >= @window.screen_width - 1
     @mouse_pos = @window.mouse_x
   end
-  
+
   def gun_bobbing
-    @weapon_offset = 2*Math::sin((milliseconds/100)%6)
+    @weapon_offset = 2 * Math::sin((Gosu.milliseconds / 100) % 6)
   end
-  
+
   def update
     @move_speed = double_keys? ? MOV_SPD/Math::sqrt(2) : MOV_SPD
-    
-    if @window.button_down? KbW
-      up 
+
+    if Gosu.button_down? Gosu::KB_W
+      up
       gun_bobbing if BOBBING
     end
-    
-    if @window.button_down? KbS
+
+    if Gosu.button_down? Gosu::KB_S
       down
       gun_bobbing if BOBBING
     end
-    
-    if @window.button_down? KbA
-      left 
+
+    if Gosu.button_down? Gosu::KB_A
+      left
       gun_bobbing if BOBBING
     end
-    
-    if @window.button_down? KbD
-      right 
+
+    if Gosu.button_down? Gosu::KB_D
+      right
       gun_bobbing if BOBBING
     end
-    
+
     turn if @mouse_pos != @window.mouse_x
   end
-  
+
   def double_keys?
-    (@window.button_down? KbW or @window.button_down? KbS) and (@window.button_down? KbA or @window.button_down? KbD)
+    (Gosu.button_down? Gosu::KB_W or Gosu.button_down? Gosu::KB_S) and (Gosu.button_down? Gosu::KB_A or Gosu.button_down? Gosu::KB_D)
   end
-  
+
   def draw
-    @weapon.draw(0.6*@window.scrW, @window.scrH-(@weapon.height-@weapon_offset-5)*@weapon_ratio, 2, @weapon_ratio, @weapon_ratio)
-    @cross.draw_rot(@window.scrW>>1, @window.scrH>>1, 2, 0, 0, 0, 2.0, 2.0)				      # draw_rot to avoid struggling with finding the exact center of screen
+    @weapon.draw(0.6 * @window.screen_width, @window.screen_height - (@weapon.height - @weapon_offset - 5) * @weapon_ratio, 2, @weapon_ratio, @weapon_ratio)
+    # draw_rot to avoid struggling with finding the exact center of screen
+    @cross.draw_rot(@window.screen_width >> 1, @window.screen_height>>1, 2, 0, 0, 0, 2.0, 2.0)
   end
 end
