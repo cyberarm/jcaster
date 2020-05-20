@@ -4,11 +4,14 @@ unless RUBY_ENGINE == "mruby"
   rescue LoadError
     require "gosu"
   end
+else
+  if not Kernel.respond_to?(:require)
+    raise "MRUBY requires mruby-require mgem (https://github.com/mattn/mruby-require)"
+  end
 end
 
 ROOT_PATH = File.expand_path("..", __FILE__)
 
-# MRUBY requires mruby-require mgem (https://github.com/mattn/mruby-require)
 require "#{ROOT_PATH}/lib/jcaster"
 require "#{ROOT_PATH}/lib/world_map"
 require "#{ROOT_PATH}/lib/player"
@@ -45,13 +48,9 @@ class Launcher < Gosu::Window
   end
 
   def save_settings
-    file = File.new("settings", 'w')
-    if file
-      file.syswrite(@screen_width.to_s + "\n" + @screen_height.to_s + "\n" + @details.to_s)
-    else
-      puts "File access error"
+    File.open("#{ROOT_PATH}/settings", "w") do |file|
+      file.write(@screen_width.to_s + "\n" + @screen_height.to_s + "\n" + @details.to_s)
     end
-    file.close
   end
 
   def draw

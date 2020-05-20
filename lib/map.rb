@@ -15,8 +15,8 @@ attr_reader :init
       Gosu.draw_quad(0, @window.image_height>>1, flr_c, @window.image_width, @window.image_height>>1, flr_c, 0, @window.image_height, flr_c, @window.image_width, @window.image_height, flr_c)
     end
 
-    @wallset = [Gosu::Image.load_tiles("media/walls.png", 1, TEXTURE_HEIGHT, tileable: true, retro: true),       #see what I did there?
-                Gosu::Image.load_tiles("media/wallsd.png", 1, TEXTURE_HEIGHT, tileable: true, retro: true)]
+    @wallset = [Gosu::Image.load_tiles("#{ROOT_PATH}/media/walls.png", 1, TEXTURE_HEIGHT, tileable: true, retro: true),       #see what I did there?
+                Gosu::Image.load_tiles("#{ROOT_PATH}/media/wallsd.png", 1, TEXTURE_HEIGHT, tileable: true, retro: true)]
 
     @init = true
   end
